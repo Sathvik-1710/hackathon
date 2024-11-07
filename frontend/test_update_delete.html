@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Testing - Update and Delete</title>
+</head>
+<body>
+    <h1>Test Update and Delete API Endpoints</h1>
+
+    <!-- Form to Update a Student -->
+    <h2>Update a Student</h2>
+    <form id="update-student-form">
+        <label for="student-id">Student ID:</label>
+        <input type="number" id="student-id" name="id" required>
+        <br>
+        <label for="student-name">New Name:</label>
+        <input type="text" id="student-name" name="name">
+        <br>
+        <label for="student-age">New Age:</label>
+        <input type="number" id="student-age" name="age">
+        <br>
+        <label for="student-skills">New Skills:</label>
+        <input type="text" id="student-skills" name="skills">
+        <br><br>
+        <button type="button" onclick="updateStudent()">Update Student</button>
+    </form>
+    <p id="update-student-response"></p>
+
+    <!-- Form to Delete a Student -->
+    <h2>Delete a Student</h2>
+    <form id="delete-student-form">
+        <label for="delete-student-id">Student ID:</label>
+        <input type="number" id="delete-student-id" required>
+        <br><br>
+        <button type="button" onclick="deleteStudent()">Delete Student</button>
+    </form>
+    <p id="delete-student-response"></p>
+
+    <!-- Form to Update a Teacher -->
+    <h2>Update a Teacher</h2>
+    <form id="update-teacher-form">
+        <label for="teacher-id">Teacher ID:</label>
+        <input type="number" id="teacher-id" name="id" required>
+        <br>
+        <label for="teacher-name">New Name:</label>
+        <input type="text" id="teacher-name" name="name">
+        <br>
+        <label for="teacher-subject">New Subject:</label>
+        <input type="text" id="teacher-subject" name="subject">
+        <br>
+        <label for="teacher-experience">New Experience (years):</label>
+        <input type="number" id="teacher-experience" name="experience">
+        <br><br>
+        <button type="button" onclick="updateTeacher()">Update Teacher</button>
+    </form>
+    <p id="update-teacher-response"></p>
+
+    <!-- Form to Delete a Teacher -->
+    <h2>Delete a Teacher</h2>
+    <form id="delete-teacher-form">
+        <label for="delete-teacher-id">Teacher ID:</label>
+        <input type="number" id="delete-teacher-id" required>
+        <br><br>
+        <button type="button" onclick="deleteTeacher()">Delete Teacher</button>
+    </form>
+    <p id="delete-teacher-response"></p>
+
+    <script>
+        // Function to update a student
+        async function updateStudent() {
+            const id = document.getElementById('student-id').value;
+            const name = document.getElementById('student-name').value;
+            const age = document.getElementById('student-age').value;
+            const skills = document.getElementById('student-skills').value;
+
+            const response = await fetch(`http://localhost:3000/students/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, age, skills })
+            });
+            const result = await response.json();
+            document.getElementById('update-student-response').textContent = JSON.stringify(result);
+        }
+
+        // Function to delete a student
+        async function deleteStudent() {
+            const id = document.getElementById('delete-student-id').value;
+
+            const response = await fetch(`http://localhost:3000/students/${id}`, {
+                method: 'DELETE'
+            });
+            const result = await response.json();
+            document.getElementById('delete-student-response').textContent = JSON.stringify(result);
+        }
+
+        // Function to update a teacher
+        async function updateTeacher() {
+            const id = document.getElementById('teacher-id').value;
+            const name = document.getElementById('teacher-name').value;
+            const subject = document.getElementById('teacher-subject').value;
+            const experience = document.getElementById('teacher-experience').value;
+
+            const response = await fetch(`http://localhost:3000/teachers/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, subject, experience })
+            });
+            const result = await response.json();
+            document.getElementById('update-teacher-response').textContent = JSON.stringify(result);
+        }
+
+        // Function to delete a teacher
+        async function deleteTeacher() {
+            const id = document.getElementById('delete-teacher-id').value;
+
+            const response = await fetch(`http://localhost:3000/teachers/${id}`, {
+                method: 'DELETE'
+            });
+            const result = await response.json();
+            document.getElementById('delete-teacher-response').textContent = JSON.stringify(result);
+        }
+    </script>
+</body>
+</html>
