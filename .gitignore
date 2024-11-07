@@ -1,0 +1,12 @@
+# Ignore node_modules (backend dependencies)
+node_modules/
+
+# Ignore environment configuration files
+.env
+
+# Ignore database backups and temporary files
+*.sql.bak
+*.temp
+
+# Ignore system files
+.DS_Store
