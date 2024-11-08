@@ -6,8 +6,7 @@ This project is a platform designed to help students identify their skills and c
 ### Project Goals
 - Help students explore career paths based on their skills.
 - Enable students to identify and bridge skill gaps.
-- Provide teachers with resources and updates on the latest teaching methods.
-- Create a seamless, user-friendly experience for both students and teachers.
+- Create a seamless, user-friendly experience students.
 
 ### Student Module
 - **Skill Assessment**: Allow students to input their current skills and career aspirations.
@@ -16,15 +15,12 @@ This project is a platform designed to help students identify their skills and c
 - **Skill Gap Identification**: Highlight any missing skills needed to reach their career goals.
 - **Learning Recommendations**: Offer tips and resources for skill improvement through ChatGPT.
 
-### Teacher Module
-- **Learning Chatbot**: Provide a chatbot to help teachers stay updated with recent teaching techniques and technology trends.
-- **Chat History**: Store chat history for teachers to refer back to previous queries and recommendations.
-
 ## Technical requirements
 Frontend:
 
 Technologies: HTML, CSS, JavaScript
 Description: Use basic web technologies for a responsive and user-friendly interface.
+
 Backend:
 
 Technologies: Node.js, Express
@@ -33,7 +29,8 @@ Database:
 
 Technology: PostgreSQL
 Description: Store data related to students’ skills, job information, chat history, and teachers’ resources.
+
 AI Integration:
 
-Tool: ChatGPT API
-Description: Use ChatGPT to provide personalized recommendations and insights in both the student and teacher modules.
+Tool: ChatGPT API,
+Description: Use ChatGPT to provide personalized recommendations.
