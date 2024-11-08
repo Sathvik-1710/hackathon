@@ -3,62 +3,51 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Career Path App</title>
+  <title>Career Path Guide</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Career Path Finder</h1>
+  <h1>Career Path Guide</h1>
 
-  <!-- Student Registration Form -->
-  <section id="register">
-    <h2>Register Student</h2>
-    <form id="registerForm">
+  <!-- User Input Section -->
+  <section id="user-input">
+    <h2>Enter Your Information</h2>
+    <form id="careerForm">
       <label for="name">Name:</label>
-      <input type="text" id="name" required>
-      <label for="age">Age:</label>
-      <input type="number" id="age" required>
+      <input type="text" id="name" name="name" required>
+
       <label for="skills">Skills (comma-separated):</label>
-      <input type="text" id="skills" placeholder="e.g., JavaScript, Node.js" required>
-      <button type="button" onclick="registerStudent()">Register</button>
+      <input type="text" id="skills" name="skills" placeholder="e.g., JavaScript, HTML" required>
+
+      <label for="desiredJob">Desired Job:</label>
+      <input type="text" id="desiredJob" name="desiredJob" placeholder="e.g., Software Developer" required>
+
+      <button type="submit">Get Recommendations</button>
     </form>
-    <div id="registerResult"></div>
   </section>
 
-  <!-- Job Matching Form -->
-  <section id="matchJobs">
-    <h2>Match Jobs Based on Skills</h2>
-    <form id="matchJobsForm">
-      <label for="matchSkills">Enter Your Skills (comma-separated):</label>
-      <input type="text" id="matchSkills" placeholder="e.g., JavaScript, React" required>
-      <button type="button" onclick="matchJobs()">Match Jobs</button>
-    </form>
-    <div id="matchJobsResult"></div>
-  </section>
+  <!-- Results Section -->
+  <section id="results">
+    <h2>Results</h2>
+    <div id="jobSuggestions">
+      <h3>Job Role Suggestions:</h3>
+      <ul id="suggestedJobsList"></ul>
+    </div>
 
-  <!-- Skill Gap Analysis Form -->
-  <section id="skillGap">
-    <h2>Skill Gap Analysis</h2>
-    <form id="skillGapForm">
-      <label for="gapSkills">Current Skills (comma-separated):</label>
-      <input type="text" id="gapSkills" placeholder="e.g., JavaScript, React" required>
-      <label for="desiredJob">Desired Job Title:</label>
-      <input type="text" id="desiredJob" placeholder="e.g., Software Developer" required>
-      <button type="button" onclick="analyzeSkillGap()">Analyze Skill Gap</button>
-    </form>
-    <div id="skillGapResult"></div>
-  </section>
+    <div id="skillGaps">
+      <h3>Skills You Lack:</h3>
+      <ul id="missingSkillsList"></ul>
+    </div>
 
-  <!-- Career Path Recommendation Form -->
-  <section id="careerPath">
-    <h2>Career Path Recommendations</h2>
-    <form id="careerPathForm">
-      <label for="pathSkills">Current Skills (comma-separated):</label>
-      <input type="text" id="pathSkills" placeholder="e.g., JavaScript, React" required>
-      <label for="desiredJobPath">Desired Job Title:</label>
-      <input type="text" id="desiredJobPath" placeholder="e.g., Software Developer" required>
-      <button type="button" onclick="recommendCareerPath()">Get Career Path</button>
-    </form>
-    <div id="careerPathResult"></div>
+    <div id="recommendedCourses">
+      <h3>Recommended Courses for Missing Skills:</h3>
+      <ul id="coursesList"></ul>
+    </div>
+
+    <div id="careerRoadmap">
+      <h3>Career Roadmap:</h3>
+      <p id="roadmapDetails"></p>
+    </div>
   </section>
 
   <script src="script.js"></script>

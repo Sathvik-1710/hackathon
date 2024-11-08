@@ -1,81 +1,52 @@
-/* Global Styles */
 body {
-    font-family: 'Arial', sans-serif;
-    background-color: #f4f7fc;
-    margin: 0;
-    padding: 20px;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-}
-
-header {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+  }
+  
+  h1 {
     text-align: center;
-    margin-bottom: 20px;
-}
-
-h1 {
-    color: #4e4e4e;
-}
-
-h2, h3 {
-    color: #333;
-}
-
-/* Card Styles */
-.card {
-    background-color: white;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    margin-bottom: 30px;
-}
-
-/* Form Styles */
-input, button {
+  }
+  
+  form, #results {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  label {
+    display: block;
+    margin-top: 10px;
+  }
+  
+  input, button {
     width: 100%;
     padding: 10px;
-    margin: 10px 0;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-button {
+    margin-top: 5px;
+  }
+  
+  button {
     background-color: #4CAF50;
     color: white;
     border: none;
     cursor: pointer;
-}
-
-button:hover {
+  }
+  
+  button:hover {
     background-color: #45a049;
-}
-
-/* Results Section */
-#results {
-    display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-}
-
-#job-matches, #skill-gap, #career-recommendations {
-    width: 32%;
-}
-
-#job-matches p, #skill-gap p, #career-recommendations p {
-    margin-top: 10px;
-}
-
-ul {
-    padding-left: 20px;
-}
-
-/* Map Styling */
-#map {
-    height: 400px;
-    border-radius: 8px;
+  }
+  
+  section {
     margin-top: 20px;
-}
+  }
+  
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  ul li {
+    background-color: #f4f4f4;
+    padding: 10px;
+    margin-top: 5px;
+    border-radius: 5px;
+  }
+  
