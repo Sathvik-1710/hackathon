@@ -3,6 +3,7 @@ require('dotenv').config();
 const express = require('express');
 const { Pool } = require('pg');
 const cors = require('cors');
+const axios = require('axios');  // Import axios for making API requests
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -37,76 +38,103 @@ app.post('/students', async (req, res) => {
   }
 });
 
-// 2. Job Matching Based on Skills (Case-Insensitive)
+// 2. Job Matching Based on Skills (Database + External API)
 app.post('/match-jobs', async (req, res) => {
   const { skills } = req.body;
   try {
-    const result = await pool.query('SELECT * FROM jobs');
-    const jobs = result.rows;
+    console.log('Matching jobs for skills:', skills);
+    // Fetch jobs from the database
+    const dbResult = await pool.query('SELECT * FROM jobs');
+    const dbJobs = dbResult.rows;
 
-    // Match jobs where all required skills are present in user's skills (case-insensitive)
-    const matchingJobs = jobs.filter(job =>
-      job.required_skills.every(requiredSkill =>
-        skills.some(userSkill => userSkill.toLowerCase() === requiredSkill.toLowerCase())
-      )
+    // Find jobs matching skills from the database
+    const matchingDbJobs = dbJobs.filter(job =>
+      job.required_skills.every(skill => skills.includes(skill))
     );
 
-    res.status(200).json({ matchingJobs });
+    // Fetch jobs from an external API
+    const externalJobAPI = `https://api.example.com/jobs?skills=${skills.join(',')}`;
+    const externalJobResult = await axios.get(externalJobAPI);
+    const externalJobs = externalJobResult.data.jobs || [];
+
+    res.status(200).json({ matchingJobs: [...matchingDbJobs, ...externalJobs] });
   } catch (error) {
     console.error('Error matching jobs:', error);
     res.status(500).json({ error: 'Failed to match jobs' });
   }
 });
 
-// 3. Skill Gap Analysis (Case-Insensitive)
+// 3. Skill Gap Analysis (Database + External API)
 app.post('/skill-gap', async (req, res) => {
   const { skills, desiredJobTitle } = req.body;
   try {
-    const result = await pool.query('SELECT * FROM jobs WHERE LOWER(title) = LOWER($1)', [desiredJobTitle]);
-    const job = result.rows[0];
+    console.log('Analyzing skill gap for:', { skills, desiredJobTitle });
+    // Check the job in the database
+    const dbResult = await pool.query('SELECT * FROM jobs WHERE title = $1', [desiredJobTitle]);
+    const dbJob = dbResult.rows[0];
 
-    if (!job) {
-      return res.status(404).json({ error: 'Job not found' });
+    if (dbJob) {
+      const skillGaps = dbJob.required_skills.filter(skill => !skills.includes(skill));
+      return res.status(200).json({ jobTitle: dbJob.title, skillGaps });
+    } 
+
+    // Fallback to external API if job not found in the database
+    const externalJobAPI = `https://api.example.com/jobs/${encodeURIComponent(desiredJobTitle)}`;
+    const externalJobResult = await axios.get(externalJobAPI);
+    const externalJob = externalJobResult.data.job;
+
+    if (externalJob) {
+      const skillGaps = externalJob.required_skills.filter(skill => !skills.includes(skill));
+      res.status(200).json({ jobTitle: externalJob.title, skillGaps });
+    } else {
+      res.status(404).json({ error: 'Job not found' });
     }
-
-    // Identify missing skills (case-insensitive)
-    const skillGaps = job.required_skills.filter(requiredSkill =>
-      !skills.some(userSkill => userSkill.toLowerCase() === requiredSkill.toLowerCase())
-    );
-
-    res.status(200).json({ jobTitle: job.title, skillGaps });
   } catch (error) {
     console.error('Error analyzing skill gaps:', error);
     res.status(500).json({ error: 'Failed to analyze skill gaps' });
   }
 });
 
-// 4. Career Path and Course Recommendation (Case-Insensitive)
+// 4. Career Path Recommendation (Database + External API)
 app.post('/career-path', async (req, res) => {
   const { skills, desiredJobTitle } = req.body;
 
   try {
-    const jobResult = await pool.query('SELECT * FROM jobs WHERE LOWER(title) = LOWER($1)', [desiredJobTitle]);
+    // Check for the job in the database
+    const jobResult = await pool.query('SELECT * FROM jobs WHERE title = $1', [desiredJobTitle]);
     const job = jobResult.rows[0];
 
-    if (!job) {
-      return res.status(404).json({ error: 'Job not found' });
+    let missingSkills = [];
+    let recommendedCourses = [];
+
+    if (job) {
+      missingSkills = job.required_skills.filter(skill => !skills.includes(skill));
+      
+      // Fetch recommended courses for the missing skills from the database
+      const courseResult = await pool.query(
+        'SELECT * FROM courses WHERE skill = ANY($1::text[])',
+        [missingSkills]
+      );
+      recommendedCourses = courseResult.rows;
+    } else {
+      // Fallback to external API if job not found in the database
+      const externalJobAPI = `https://api.example.com/jobs/${encodeURIComponent(desiredJobTitle)}`;
+      const externalJobResult = await axios.get(externalJobAPI);
+      const externalJob = externalJobResult.data.job;
+
+      if (externalJob) {
+        missingSkills = externalJob.required_skills.filter(skill => !skills.includes(skill));
+      }
+
+      // Fetch recommended courses for the missing skills from an external API
+      const externalCourseAPI = `https://api.example.com/courses?skills=${missingSkills.join(',')}`;
+      const externalCourseResult = await axios.get(externalCourseAPI);
+      recommendedCourses = externalCourseResult.data.courses || [];
     }
 
-    // Identify missing skills for the desired job (case-insensitive)
-    const missingSkills = job.required_skills.filter(requiredSkill =>
-      !skills.some(userSkill => userSkill.toLowerCase() === requiredSkill.toLowerCase())
-    );
-
-    // Fetch recommended courses for the missing skills
-    const courseResult = await pool.query(
-      'SELECT * FROM courses WHERE skill = ANY($1::text[])',
-      [missingSkills]
-    );
-
-    res.json({ roadmap: missingSkills, recommendedCourses: courseResult.rows });
+    res.json({ roadmap: missingSkills, recommendedCourses });
   } catch (error) {
-    console.error('Error in /career-path endpoint:', error);
+    console.error('Error in /career-path endpoint:', error);  // Log detailed error
     res.status(500).json({ error: 'Failed to recommend career paths' });
   }
 });

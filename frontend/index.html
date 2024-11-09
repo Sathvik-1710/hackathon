@@ -1,55 +1,61 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Career Path Guide</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Path Guide</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Career Path Guide</h1>
+    <div class="container">
+        <h1>Career Path Guide</h1>
+        
+        <!-- Input Form -->
+        <form id="career-form">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
 
-  <!-- User Input Section -->
-  <section id="user-input">
-    <h2>Enter Your Information</h2>
-    <form id="careerForm">
-      <label for="name">Name:</label>
-      <input type="text" id="name" name="name" required>
+            <label for="skills">Skills (comma-separated):</label>
+            <input type="text" id="skills" name="skills" required>
 
-      <label for="skills">Skills (comma-separated):</label>
-      <input type="text" id="skills" name="skills" placeholder="e.g., JavaScript, HTML" required>
+            <label for="desiredJob">Desired Job:</label>
+            <input type="text" id="desiredJob" name="desiredJob" required>
 
-      <label for="desiredJob">Desired Job:</label>
-      <input type="text" id="desiredJob" name="desiredJob" placeholder="e.g., Software Developer" required>
+            <button type="submit">Get Recommendations</button>
+        </form>
 
-      <button type="submit">Get Recommendations</button>
-    </form>
-  </section>
+        <!-- Personalized Greeting Message -->
+        <div id="greetingMessage"></div>
 
-  <!-- Results Section -->
-  <section id="results">
-    <h2>Results</h2>
-    <div id="jobSuggestions">
-      <h3>Job Role Suggestions:</h3>
-      <ul id="suggestedJobsList"></ul>
+        <!-- Display Results -->
+        <div id="results">
+            <h2>Results</h2>
+
+            <div id="job-role-suggestions">
+                <h3>Job Role Suggestions:</h3>
+                <ul id="jobList"></ul>
+            </div>
+
+            <div id="skill-gap">
+                <h3>Skills You Need to Work On:</h3>
+                <ul id="missingSkillsList"></ul>
+            </div>
+
+            <div id="recommended-courses">
+                <h3>Recommended Courses for Missing Skills:</h3>
+                <ul id="coursesList"></ul>
+            </div>
+
+            <div id="career-roadmap">
+                <h3>Career Roadmap:</h3>
+                <ul id="roadmapList"></ul>
+            </div>
+        </div>
+
+        <!-- Motivational Quote -->
+        <div id="motivationalQuote"></div>
     </div>
 
-    <div id="skillGaps">
-      <h3>Skills You Lack:</h3>
-      <ul id="missingSkillsList"></ul>
-    </div>
-
-    <div id="recommendedCourses">
-      <h3>Recommended Courses for Missing Skills:</h3>
-      <ul id="coursesList"></ul>
-    </div>
-
-    <div id="careerRoadmap">
-      <h3>Career Roadmap:</h3>
-      <p id="roadmapDetails"></p>
-    </div>
-  </section>
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
