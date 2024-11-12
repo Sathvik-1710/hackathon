@@ -11,3 +11,5 @@ node_modules/
 # Ignore system files
 .DS_Store
 .env
+# Ignore hackathon key
+backend/hackathon-key.json
