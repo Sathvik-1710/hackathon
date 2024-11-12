@@ -1,150 +1,57 @@
-// Import necessary libraries and set up the server and database pool
 require('dotenv').config();
 const express = require('express');
-const { Pool } = require('pg');
-const cors = require('cors');
-const axios = require('axios');  // Import axios for making API requests
-
+const admin = require('firebase-admin');
+const axios = require('axios');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(cors());
-app.use(express.json()); // Middleware to parse JSON request bodies
+// Initialize Firebase
+const serviceAccount = require(process.env.FIREBASE_KEY_PATH);
 
-// Set up database connection pool
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: `https://${process.env.FIREBASE_PROJECT_ID}.firebaseio.com`
 });
 
-// 1. Add a student to the database
-app.post('/students', async (req, res) => {
-  const { name, age, skills } = req.body;
-  try {
-    if (!name || !age || !skills) {
-      return res.status(400).json({ error: 'Name, age, and skills are required' });
-    }
-    const result = await pool.query(
-      'INSERT INTO students (name, age, skills) VALUES ($1, $2, $3) RETURNING *',
-      [name, age, skills]
-    );
-    res.status(201).json(result.rows[0]);
-  } catch (error) {
-    console.error('Error adding student:', error);
-    res.status(500).json({ error: 'Failed to add student' });
-  }
+const db = admin.firestore();
+
+// Set Content Security Policy
+app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy', "default-src 'self'; img-src 'self';");
+  next();
 });
 
-// 2. Job Matching Based on Skills (Database + External API)
-app.post('/match-jobs', async (req, res) => {
-  const { skills } = req.body;
-  try {
-    console.log('Matching jobs for skills:', skills);
-    // Fetch jobs from the database
-    const dbResult = await pool.query('SELECT * FROM jobs');
-    const dbJobs = dbResult.rows;
-
-    // Find jobs matching skills from the database
-    const matchingDbJobs = dbJobs.filter(job =>
-      job.required_skills.every(skill => skills.includes(skill))
-    );
-
-    // Fetch jobs from an external API
-    const externalJobAPI = `https://api.example.com/jobs?skills=${skills.join(',')}`;
-    const externalJobResult = await axios.get(externalJobAPI);
-    const externalJobs = externalJobResult.data.jobs || [];
-
-    res.status(200).json({ matchingJobs: [...matchingDbJobs, ...externalJobs] });
-  } catch (error) {
-    console.error('Error matching jobs:', error);
-    res.status(500).json({ error: 'Failed to match jobs' });
-  }
-});
-
-// 3. Skill Gap Analysis (Database + External API)
-app.post('/skill-gap', async (req, res) => {
-  const { skills, desiredJobTitle } = req.body;
-  try {
-    console.log('Analyzing skill gap for:', { skills, desiredJobTitle });
-    // Check the job in the database
-    const dbResult = await pool.query('SELECT * FROM jobs WHERE title = $1', [desiredJobTitle]);
-    const dbJob = dbResult.rows[0];
-
-    if (dbJob) {
-      const skillGaps = dbJob.required_skills.filter(skill => !skills.includes(skill));
-      return res.status(200).json({ jobTitle: dbJob.title, skillGaps });
-    } 
-
-    // Fallback to external API if job not found in the database
-    const externalJobAPI = `https://api.example.com/jobs/${encodeURIComponent(desiredJobTitle)}`;
-    const externalJobResult = await axios.get(externalJobAPI);
-    const externalJob = externalJobResult.data.job;
-
-    if (externalJob) {
-      const skillGaps = externalJob.required_skills.filter(skill => !skills.includes(skill));
-      res.status(200).json({ jobTitle: externalJob.title, skillGaps });
-    } else {
-      res.status(404).json({ error: 'Job not found' });
-    }
-  } catch (error) {
-    console.error('Error analyzing skill gaps:', error);
-    res.status(500).json({ error: 'Failed to analyze skill gaps' });
-  }
-});
-
-// 4. Career Path Recommendation (Database + External API)
-app.post('/career-path', async (req, res) => {
-  const { skills, desiredJobTitle } = req.body;
-
-  try {
-    // Check for the job in the database
-    const jobResult = await pool.query('SELECT * FROM jobs WHERE title = $1', [desiredJobTitle]);
-    const job = jobResult.rows[0];
-
-    let missingSkills = [];
-    let recommendedCourses = [];
-
-    if (job) {
-      missingSkills = job.required_skills.filter(skill => !skills.includes(skill));
-      
-      // Fetch recommended courses for the missing skills from the database
-      const courseResult = await pool.query(
-        'SELECT * FROM courses WHERE skill = ANY($1::text[])',
-        [missingSkills]
-      );
-      recommendedCourses = courseResult.rows;
-    } else {
-      // Fallback to external API if job not found in the database
-      const externalJobAPI = `https://api.example.com/jobs/${encodeURIComponent(desiredJobTitle)}`;
-      const externalJobResult = await axios.get(externalJobAPI);
-      const externalJob = externalJobResult.data.job;
-
-      if (externalJob) {
-        missingSkills = externalJob.required_skills.filter(skill => !skills.includes(skill));
-      }
-
-      // Fetch recommended courses for the missing skills from an external API
-      const externalCourseAPI = `https://api.example.com/courses?skills=${missingSkills.join(',')}`;
-      const externalCourseResult = await axios.get(externalCourseAPI);
-      recommendedCourses = externalCourseResult.data.courses || [];
-    }
-
-    res.json({ roadmap: missingSkills, recommendedCourses });
-  } catch (error) {
-    console.error('Error in /career-path endpoint:', error);  // Log detailed error
-    res.status(500).json({ error: 'Failed to recommend career paths' });
-  }
-});
-
-// Root route
+// Root URL Endpoint
 app.get('/', (req, res) => {
-  res.send('Server is up and running!');
+  res.send('Welcome to the Hackathon Project!');
 });
 
-// Start the server
+// Endpoint to get jobs from Adzuna API
+app.get('/adzuna/jobs', async (req, res) => {
+  try {
+    const response = await axios.get(`https://api.adzuna.com/v1/api/jobs/in/search/1?app_id=${process.env.ADZUNA_APP_ID}&app_key=${process.env.ADZUNA_APP_KEY}`);
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching Adzuna jobs:', error);
+    res.status(500).send('Error fetching Adzuna jobs');
+  }
+});
+
+// Endpoint to get courses from Coursera API
+app.get('/coursera/courses', async (req, res) => {
+  try {
+    const response = await axios.get(process.env.COURSE_CATALOG_URL, {
+      headers: {
+        'Authorization': `Bearer ${process.env.COURSE_API_KEY}`
+      }
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error('Error fetching Coursera courses:', error);
+    res.status(500).send('Error fetching Coursera courses');
+  }
+});
+
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
